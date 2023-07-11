@@ -285,5 +285,175 @@ select * from emp
 -- EMPLOYEE테이블에서 부서코드와 보너스 받는 사원 수 조회하고 부서코드 순으로 정렬
 -- EMPLOYEE테이블에서 성별과 성별 별 급여 평균(정수처리), 급여 합계, 인원 수 조회하고 인원수로 내림차순 정렬
 
+select empno, loc
+    from emp cross join dept
+;
 
+select * from emp;
+select * from salgrade;
+-- 사원의 이름, 사번, sal, grade를 조회 
 
+select e.ename,e.empno,e.sal,s.grade 등급
+    from emp e
+    join salgrade s on e.sal between s.losal and s.hisal
+    order by s.grade desc, e.sal desc 
+;
+select empno, ename, mgr from emp;
+select e.empno, e.ename, e.mgr, m.ename mgrname 
+    from emp e join emp m 
+    on e.mgr = m.empno
+;
+--같은 이름 컬럼명이 나타나지 않도록 별칭사용 
+select e.empno boss, e.ename, m.empno emp, m.ename emps 
+    from emp e join emp m 
+    on e.empno = m.mgr
+;
+
+select ename from emp where empno = 7566
+;
+
+create table t1(
+    c1 char(5),
+    c2 varchar2(5)
+);
+insert into t1 values('12','12');
+insert into t1 values('12345','12345');
+--오류 보고 -
+--ORA-12899: "SCOTT"."T1"."C1" 열에 대한 값이 너무 큼(실제: 6, 최대값: 5)
+--insert into t1 values('123456','123456');
+--insert into t1 values('12345','123456');
+--오류 보고 -
+--ORA-12899: "SCOTT"."T1"."C2" 열에 대한 값이 너무 큼(실제: 6, 최대값: 5)
+commit;
+
+select * 
+    from t1
+;
+select length(c1), length(c2) 
+    from t1
+;
+
+desc t1;
+desc emp;
+
+--select
+--from
+--order by cl desc 
+
+--ERD ( entity relationship diagram )
+--UML - classdiagram, ERD 
+
+--rownum 번호 섞임 select에서 rownum, order by 순서 하위 
+select rownum, e.* from emp e where deptno in (20, 30)
+    order by ename asc
+;
+
+select rownum, e.* 
+    from (select * from emp order by ename asc) e
+    where deptno in (20, 30)
+;
+select rownum, e.* 
+    from (select * from emp  where deptno in (20, 30) order by ename asc) e
+; 
+
+--해결 방법 
+--1page 1-3
+select rownum, e.* 
+    from (select * from emp  where deptno in (20, 30) order by ename asc) e
+    where rownum between 1 and 3
+; 
+--2page 4-6
+select rownum rnum, e.* 
+    from (select * from emp  where deptno in (20, 30) order by ename asc) e
+    where rownum between 4 and 6
+--    rnum은 select -6 수행순서로 where 절에서 사용할 수 없음.
+; 
+--해결 -ROWNUM을 제대로 사용하기 위해서는 2개의 중첩 subquery(inline-view)필요함.
+--3page 7-9
+select *
+    from(select rownum rnum, e.* 
+        from (select * from emp where deptno in(20,30) order by ename asc) e
+        )
+        where rnum between 7 and 9
+;
+
+--select sysdate, e.* 
+--    from (select * from emp  where deptno in (20, 30) order by ename asc) e
+--    where sysdate > '2023-07-11'
+--; 오류
+
+with abc as (select rownum rnum, e.* 
+        from (select * from emp where deptno in(20,30) order by ename asc) e)
+select *
+    from abc
+    where rnum between 7 and 9
+;
+with abc as (select rownum rnum, e.* 
+        from (select * from emp where deptno in(20,30) order by ename asc) e)
+select *
+    from abc 
+    where rnum between 7 and 9
+--  abc 가 마치 새로운 테이블 처럼 사용가능함.    
+--        and sal > (select avg(sal) from abc) 
+;
+
+create or replace view view_abc  
+as
+select rownum rnum, e.* 
+        from (select * from emp where deptno in(20,30) order by ename asc) e
+    ;
+select * from view_abc;
+
+select *
+    from view_abc
+    where rnum between 7 and 9
+ ;
+ 
+--null이 아닌 정보 조회
+select *
+    from emp
+    where comm is not null;
+--null인 사람 조회 
+select *
+    from emp
+    where comm is null;    
+--3
+select *
+    from emp
+    where mgr is null;
+--4
+select *
+    from emp
+    order by sal desc;
+--5
+select *
+    from emp 
+    order by sal desc , comm desc;
+--6
+select empno, ename, sal, hiredate
+    from emp
+    order by hiredate
+;
+--7
+select empno, ename
+    from emp
+    order by empno desc;
+--8
+select empno, hiredate, ename, sal
+    from emp
+    order by deptno, hiredate desc;
+--9
+date_format(now(), '%Y-%m-%d');
+--10
+select empno, ename, round(sal,-2)
+    from emp
+    order by sal desc;
+--11
+select * 
+    from emp
+    where mod(empno, 2)='1';
+--12
+select ename, extract(year from hiredate) year, extract(month from hiredate) month
+    from emp;
+--13
+select 

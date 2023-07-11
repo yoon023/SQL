@@ -152,5 +152,67 @@ SELECT distinct DEPT_CODE    FROM EMPLOYEE;
 SELECT distinct DEPT_CODE    FROM EMPLOYEE
     order by dept_code asc
 ; 
+select *
+from EMPLOYEE E
+    , DEPARTMENT D
+    WHERE E.DEPT_CODE = D.DEPT_ID(+)
+;
 
+select *
+from EMPLOYEE E
+    RIGHT OUTER JOIN DEPARTMENT D ON E.DEPT_CODE = D.DEPT_ID
+;
+select *
+from EMPLOYEE E
+    , DEPARTMENT D
+    WHERE  E.DEPT_CODE(+) = D.DEPT_ID
+;
+select *
+from EMPLOYEE E
+    FULL OUTER JOIN DEPARTMENT D ON E.DEPT_CODE = D.DEPT_ID
+;
+select emp_id,emp_name,job_code,salary
+from employee
+where salary >= (select avg(salary)from employee);
+
+(select avg(salary)from employee);
+
+--전 직원의 급여 평균보다 많은 급여를 받는 직원의 이름, 직급, 부서, 급여조회
+select emp_name, job_code,dept_code,salary
+from employee e
+where salary >=(select avg(salary)from employee)
+order by 2;
+
+--부서별 최고 급여를 받는 직원의 이름, 직급, 부서, 급여 조회
+select emp_name, job_code, dept_code, salary
+from employee
+where salary in(select max(salary) from employee group by dept_code)
+order by 3;
+
+select emp_name, job_code, dept_code, hire_date
+from employee
+where (dept_code, job_code) in (select dept_code, job_code 
+from employee 
+where substr(emp_no,8,1)=2 and ent_yn='y');
+
+--직급별 최소 급여를 받는 직원의 사번, 이름, 직급, 급여 조회
+select emp_id, emp_name, job_code, salary
+from employee
+where(job_code, salary) in (select job_code, min(salary)
+from employee
+group by job_code)
+order by 3; 
+
+--낮은번호부터 <=5 중에서 사원 이름 , 급여 내림차순 
+select rownum, emp_name, salary
+    from employee
+    where rownum <=5 
+order by salary desc;                                     
+
+--인라인뷰
+select rownum, emp_name, salary
+    from(select*
+        from employee
+        order by salary desc)
+    where rownum<=5;
 
