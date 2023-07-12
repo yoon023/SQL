@@ -215,4 +215,47 @@ select rownum, emp_name, salary
         from employee
         order by salary desc)
     where rownum<=5;
+-- 20230712
+-- 16. EMPLOYEE테이블에서 사원명, 주민번호 조회 (단, 주민번호는 생년월일만 보이게하고, '-'다음 값은 '*'로 바꾸기)
+select emp_id, emp_no, substr(emp_no, 1, 7), RPAD(substr(emp_no, 1, 7),14, '*')
+    from employee
+;
+select * from employee;
+select dept_code, job_code, manager_id , floor(avg(salary))
+from employee
+group by grouping sets((dept_code,job_code,manager_id),(dept_code,manager_id),(job_code,manager_id));
 
+create table user_unique(
+    user_no number,
+    user_id varchar2(20) unique,
+    user_pwd varchar2(30) not null,
+    user_name varchar2(30),
+    gender varchar2(10),
+    phone varchar2(30),
+    email varchar2(50)
+    );
+insert into user_unique values(1, 'user01', 'pass01', '홍길동', '남', '010-1234-5678', 'hong123@kh.or.kr');
+--insert into user_unique values(1, 'user01', 'pass01', null, null, '010-1234-5678', 'hong123@kh.or.kr');
+create table user_unique2(
+    user_no number,
+    user_id varchar2(20) unique,
+    user_pwd varchar2(30) not null,
+    user_name varchar2(30),
+    gender varchar2(10),
+    phone varchar2(30),
+    email varchar2(50),
+    unique(user_id)
+    );
+--insert into user_unique values(1, 'user01', 'pass01', null, null, '010-1234-5678', 'hong123@kh.or.kr');   
+insert into user_unique2 values(1, 'user01', 'pass01', '홍길동', '남', '010-1234-5678', 'hong123@kh.or.kr');
+create table user_unique3(
+    user_no number,
+    user_id varchar2(20) unique,
+    user_pwd varchar2(30) not null,
+    user_name varchar2(30),
+    gender varchar2(10),
+    phone varchar2(30),
+    email varchar2(50),
+    unique(user_no,user_id)
+    );
+insert into user_unique3 values(1, 'user01', 'pass01', '홍길동', '남', '010-1234-5678', 'hong123@kh.or.kr');

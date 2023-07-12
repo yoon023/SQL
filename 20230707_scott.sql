@@ -456,4 +456,121 @@ select *
 select ename, extract(year from hiredate) year, extract(month from hiredate) month
     from emp;
 --13
-select 
+
+--20230712
+-- GRADE 별로 평균급여에 10프로 내외의 급여를 받는 사원명을 조회 - 정렬
+select s.grade e.ename, e.sal
+    from emp e join salgrade s
+        on e.sal between s.local and s.hisal
+    where e.sal >
+-- 다중 행 결과물과 >= 비교 안됨.   (950, 1266, 1550, 2879, 5000) 
+    (
+    select avg(sal)
+    from emp e2 join salgrade s2
+        on e.2sal between s2.losal and s2.hisal
+    where s2.grade = s.grade
+--    group by s.grade having s2.grade = 4
+    )*0.9
+;
+select avg(sal), s.grade
+    from emp e join salgrade s
+        on e.sal between s.losal and s.hisal
+    group by s.grade
+;
+-- with 사용
+--with abc2 as ( select avg(sal) avgsal
+--    from emp e2 join salgrade s2
+--        on e.2sal between s2.losal and s2.hisal
+--    where s2.grade = s.grade 
+--    )
+--select s.grade, e.ename, e.sal
+--    from emp e join salgrade s
+--        on e.sal between s.losal and s.hisal
+--    where e.sal > abc2.avgsal*0.9 and e.sal < abc2.avgsal *1.1
+--; 오류 
+
+--with사용
+with abc3 as ( select s.grade, e.ename, e.sal
+    from emp e join salgrade s
+        on e.sal between s.losal and s.hisal)
+select *
+    from abc3 t1
+    where sal between (select avg(t2.sal) from abc3 t2
+    where t2.grade = t1.grade
+    )*0.9
+    and (select avg(t2.sal) from abc3 t2 where t2.grade = t1.grade)*1.1 
+;
+--main쿼리 값 sub쿼리 값 비교할 때 상호연관 서브쿼리, 한 행의 결과물이면서 상호연관 스칼라 서브쿼리 
+
+select t1.grade, ename "10프로 내외"
+    from view_emp_salgrade t1
+    where sal between (select avg(t2.sal) from view_emp_salgrade t2
+    where t2.grade = t1.grade
+    )*0.9
+    and (select avg(t2.sal) from view_emp_salgrade t2 where t2.grade = t1.grade)*1.1 
+    order by t1.grade asc, 2 asc
+;
+
+--where 사용 
+--select에서 rownum 반드시별칭
+--select에서 함수사용한 경우 반드시 별칭
+
+
+create or replace view view_emp_salgrade
+as
+(select e.empno, e.ename, job, mgr, hiredate, sal, comm, deptno, grade, losal, hisal
+    from emp e join salgrade s
+        on e.sal between s.losal and s.hisal)
+;
+
+--from 절 subquery
+select grade, ename "10프로 내외"
+    from emp e join(
+        select floor(avg(e2.sal)*0.9) minsal, floor(avg(e2.sal)*1.1) maxsal, floor(avg(e2.sal)) avgsal, s2.grade, s2.losal, s2.hisal 
+          from emp e2 join salgrade s2 on e2.sal between s2.losal and s2.hisal
+        group by s2.grade, s2.losal, s2.hisal
+        ) m
+        on e.sal between m.losal and m.hisal
+    where e.sal between minsal and maxsal
+    order by grade asc, 2 asc
+;
+--group by 사용시
+--select 컬럼명으로는 group by에 사용된 컬럼명 작성가능. 그리고 그룹함수 사용가능.
+
+select avg(e2.sal)*0.9 minsal, avg(e2.sal)*1.1 maxsal, avg(e2.sal) avgsal, s2.grade,
+--s2.losal, s2.hisal 
+        from emp e2 join salgrade s2 on e2.sal between s2.losal and s2.hisal
+        group by s2.grade 
+        , s2.losal, s2.hisal
+        ;
+
+with abc4 as (
+     select floor(avg(e2.sal)*0.9) minsal, floor(avg(e2.sal)*1.1) maxsal, floor(avg(e2.sal)) avgsal, s2.grade, s2.losal, s2.hisal 
+          from emp e2 join salgrade s2 on e2.sal between s2.losal and s2.hisal
+        group by s2.grade, s2.losal, s2.hisal
+        )
+select grade, ename "10프로내외"
+    from emp e join abc4
+    on e.sal between minsal and maxsal
+    order by grade asc, 2 asc
+;
+-- 지역 재난 지원금을 사원들에게 추가 지급
+-- 조건
+--1. new york 지역은 sal의 2% dallas 지역은 sal의 5% chicago지역은 sal의 3% boston지역은 sal의 7%
+select empno, ename, sal, loc,  
+    decode(loc, 'NEW YORK', sal*0.02, 'DALLAS', sal*0.05, 'CHICAGO', sal*0.03,'BOSTON' , sal*0.07,0)
+    case loc 
+        when 'NEW YORK' then sal*0.02
+        when 'DALLAS' then sal*0.05
+        when 'CHICAGO' then sal*0.03
+        when 'BOSTON' then sal*0.07
+        end
+        
+     as sal_subsidy
+    from emp e 
+        join dept d on using (deptno)
+--    where 
+--    group by 
+--    having  
+    order by sal_subsidy
+;  
