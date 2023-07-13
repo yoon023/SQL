@@ -574,3 +574,184 @@ select empno, ename, sal, loc,
 --    having  
     order by sal_subsidy
 ;  
+--SALESMAN들의 급여와 같은 급여를 받는 사원을 조회
+select empno, ename, sal
+    from emp
+    where sal > any(select sal from emp where job='SALESMAN')
+;
+--= any in 과 같은 역할
+    select ename, sal from emp where job = 'SALESMAN'
+;
+--관리자로 등록되어 있는 사원들을 조회
+select empno, ename
+    from emp e
+    where exists( select empno from emp e2 where e2.empno = e.mgr)
+;
+select * from emp;
+select e.empno, e.ename
+    from emp e join emp e2
+    on e.empno = e2.mgr
+;
+--join 대비 상관쿼리사용시 속도 향상 
+--in 다중비교 가능 다중행 
+
+select *
+    from emp
+    where(deptno, sal) in (select deptno, sal from emp where deptno=30)
+;
+-- 부서별 평균급여와 직원들 정보를 조회해주세요.
+select e.*
+    --스칼라 서브쿼리 작성되어야함
+        (select trunc(avg(sal)) from emp e2 where e2.deptno = e.deptno) avgsal
+    from emp e
+;
+
+select e.*,
+    case e.deptno 
+        when 10 then  (select trunc(avg(sal)) from emp e2 where e2.deptno = 10)
+    end avgsal
+    from emp e 
+;
+--직원 정보와 부서번호, 부서명, 부서위치
+select ename, deptno, dname, loc
+    from emp join dept using(deptno)
+;
+select ename, deptno,
+    (select dname from dept d where d.deptno = e.deptno) dname,
+    (select loc from dept d where d.deptno = e.deptno)loc
+    from emp e
+;
+-- SALESMAN 과 MANAGER를 조회해주세요.
+select * from emp
+    where job = 'SALESMAN' or job = 'MANAGER';
+select * from emp 
+    where job in('SALESMAN','MANAGER');
+select * from emp
+    where job = 'SALESMAN'
+union
+select * from emp
+    where job = 'MANAGER';
+select empno, ename, job from emp
+    where job = 'SALESMAN'
+union
+select empno, ename, job from emp
+    where job = 'MANAGER';
+--급여가 1000미만인 직원, 2000미만인 직원 조회 - 중복 포함 결과
+select empno, ename, sal from emp where sal <1000
+union all
+select empno, ename, sal from emp where sal <2000
+;
+--급여가 1000초과인 직원, 2000미만인 직원 조회 - 중복 포함 결과 intersect
+select empno, ename, sal from emp where sal >1000
+intersect
+select empno, ename, sal from emp where sal <2000
+;
+-- 2000미만인 직원을 제외하고 조회 - minus
+select empno, ename, sal from emp
+minus
+select empno, ename, sal from emp where sal <2000
+;
+-- not exists
+select empno, ename, sal from emp e
+    where not exists (select * from emp e2 where e.sal < 2000)
+;
+
+--DDL
+--comment 
+comment on column emp.mgr is '관리자사번';
+
+desc emp;
+desc user_constraints;
+select * from user_constraints;
+select * from user_tables;
+select * from user_views;
+select * from user_cons_columns;
+
+--20230713
+select * from emp;
+create table emp_copy1 as select * from emp;
+select * from emp_copy1;
+create view view_emp1 as select * from emp;
+select * from view_emp1;
+desc emp;
+insert into emp values(8000,'EJKIM','KH',7788,sysdate,3000,700,40);
+commit;
+insert into emp_copy1 values(8001,'EJ1','KH',7788,sysdate,3000,700,40);
+commit;
+insert into view_emp1 values(8002,'EJ2','KH',7788,sysdate,3000,700,40);
+commit;
+create table emp_copy20 as 
+select empno, ename 사원명, job, hiredate, sal, deptno 
+from emp
+where deptno =20
+;
+desc emp;
+desc emp_copy20;
+select * from user_constraints;
+
+--20230713
+--insert into emp (칼럼명1, 칼럼명2 ,...) values (값1, 값2 ,...);
+insert into emp(ename, empno, job, mgr, hiredate,deptno)
+    values( 'EJK', 8003, 'T', 7788, sysdate, 40);
+select * from emp;
+insert into emp(ename, empno, job, mgr, hiredate,deptno)
+    values( 'EJK2', 8004, 'P', null, to_date('2023-07-12', 'yyyy-mm-dd'), 40);
+commit; --위치상관없음
+update emp 
+    set mgr = 7788
+;
+rollback; --커밋 하기전 시점  
+
+--20번 부서의 mgr이 smith 7908로 조직개편
+update emp
+    set mgr = 7908
+    where deptno = 20
+;
+rollback;
+
+select * from emp;
+--dql select 명령어 결과 resultset
+--dml insert update delete 결과 정수 0,1,2 ... n행이 삽입 되었습니다 수정 , 삭제 
+--30번 부서의 mgr이 smith 7908로 조직개편
+update emp
+    set mgr = 7902
+    where ename = 'EJK2'
+;
+--프로그램 종료시  commit? 접속해제중단 커밋
+--여러 DML 명령어들을 묶어서 하나의 행동(일)처리를 하고자 할 때 commit / rollback을 적절히 사용.
+--1. DML 명령어가 하나의 행동(일) 처리 단위라면 DML - commit; 바로 
+--2. 이상 DML 명령어가 하나의 행동(일) 처리 단위라면 DML 모두가 성공해야 - commit; 그 중 일부가 실패했다면 -rollback
+--하나의 행동(일) 처리 단위를 Transaction 트랜잭션 - commit / rollback 명령어가 수행되는 단위 
+--commit; 
+--rollback;
+commit;
+-- 새로운 부서 50번이 만들어지고 그 부서에 신입사원 EJ3(8005), EJ4(5006) 을 투입함.
+select * from emp;
+select * from dept;
+rollback;
+--20번 부서에 신입사원 EJ3(8005), EJ4(5006) 을 투입함.
+insert into emp(ename, empno, deptno)  values ('EJ3', 8005, 20);
+insert into emp(ename, empno, deptno) values ('EJ4', 8006, 20);
+insert all
+    into emp( ename, empno, deptno) values ('EJ3', 8005, 20)
+    into emp(ename, empno, deptno) values ('EJ4', 8006, 20)
+select * from dual
+;
+select *from dual; --임시 테이블
+select sysdate from dual; --날짜 
+
+insert into emp (ename, empno, deptno) values ('EJ7', (select max(empno) maxempno from emp)+1, 20);
+insert into emp (ename, empno, deptno) values ('EJ8', (select max(empno) maxempno from emp)+1, 20);
+
+select * from emp;
+
+insert all
+    into dept (deptno) values (newdeptno)
+    into emp (ename, empno, deptno) values ('EJ9',(select max(empno) maxempno from emp)+1, 20 )
+    into emp (ename, empno, deptno) values ('EJ10',(select max(empno) maxempno from emp)+2, 20 )
+select max(deptno)+10 newdeptno from dept;
+rollback;
+create table dept_copy2 as select * from dept where 1<>1;
+-- DDL 명령어 수행시 commit 행동도 함께 수행됨. DDL, DQL 
+
+

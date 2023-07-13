@@ -1,3 +1,6 @@
+
+
+
 Rem Copyright (c) 1990 by Oracle Corporation
 Rem NAME
 REM    UTLSAMPL.SQL
@@ -27,6 +30,11 @@ rem OATES:     Created: 16-Feb-83
 --CONNECT SCOTT/TIGER
 
 -- EMP-FK - DEPT-PK
+--drop 순서는 create 순서 반대
+--fk인 테이블을 먼저 drop 
+--drop table emp cascade constraints;
+
+
 DROP TABLE EMP; 
 DROP TABLE DEPT;
 
