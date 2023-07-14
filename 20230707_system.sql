@@ -28,7 +28,7 @@ grant connect, resource, dba to scott, kh;
 --create table emp
 --create user scott
 
-
+                                                                                                                                                                                                                          
 
 
 
