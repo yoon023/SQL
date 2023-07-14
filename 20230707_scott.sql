@@ -754,4 +754,69 @@ rollback;
 create table dept_copy2 as select * from dept where 1<>1;
 -- DDL 명령어 수행시 commit 행동도 함께 수행됨. DDL, DQL 
 
+--t2테이블이 없음에도 view를 생성
+create or replace force view view_t2
+    as select * from t2;
+create or replace view view_emp_readonly
+    as select * from emp
+    with read only   
+; 
+insert into view_emp_readonly (empno, ename, deptno) values (8100, 'EJEJ', 30);
+--오류 보고 -
+--SQL 오류: ORA-42399: 읽기 전용 뷰에서는 DML 작업을 수행할 수 없습니다.
+--42399.0000 - "cannot perform a DML operation on a read-only view"
+
+create or replace view view_emp_checkoption
+    as
+    select * from emp
+    where deptno= 30
+    with check option
+; 
+select * from view_emp_checkoption;
+--update view_emp_checkoption set deptno = 20 where empno = 7499
+--오류 보고 -
+--ORA-01402: 뷰의 WITH CHECK OPTION의 조건에 위배 됩니다
+update view_emp_checkoption set comm=350 where empno = 7499;
+update emp set deptno=20 where empno=7499;
+
+create sequence seq_t1;
+
+select seq_t1.nextval from dual;
+select seq_t1.currval from dual;
+--ORA-08002: 시퀀스 SEQ_T1.CURRVAL은 이 세션에서는 정의 되어 있지 않습니다
+--08002. 00000 -  "sequence %s.CURRVAL is not yet defined in this session"
+--*Cause:    sequence CURRVAL has been selected before sequence NEXTVAL
+--*Action:   select NEXTVAL from the sequence before selecting CURRVAL
+--sequence 이름을 지을 때 seq_테이블명_컬럼명
+--예를 들어 emp테이블에 empno에 적용 - seq_emp_empno
+--insert into emp values(seq_emp_empno.nextval, '홍길동',.....);
+select * from user_sequences;
+--
+select * from user_indexes;
+select * from user_ind_columns;
+select * from user_constraints;
+select * from user_cons_columns;
+
+
+create index idx_emp_sal on emp(sal);
+create index idx_emp_sal on emp(sal*12);
+--where 절에 sal*12 >5000 처럼 조건문에 사용이 빈번할 때 index를 걸어줌 
+create index idx_emp_sal_comn on emp(sal, comm);
+--where 절에 sal*12 >5000 and comm >200 처럼 조건문에 사용이 빈번할 때 index를 걸어줌. 
+select * from emp where sal>3000 and comm is not null;
+--bitmap 기반 index -도메인의 종류가 적을 때 동일한 데이터가 많은 경우 - gender 남여
+create bitmap index idx_emp_deptno on emp(deptno);
+create bitmap index idx_emp_deptno_job on emp(job,deptno);
+--unique
+--insert 오류체크빠름
+--non-unique
+alter index pk_emp rebuild;
+
+
+select * from kh.dept;
+
+--create public synonym dept_public for kh.dept;
+select * from dept2_public;
+select * from kh.department;
+
 

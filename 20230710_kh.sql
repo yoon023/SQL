@@ -543,7 +543,7 @@ select * from v_emp_job;
 --view3
 create or replace view v_job(사번, 이름, 직급, 성별, 근무년수)
 as select job_code, job_name
-    from job
+    from job 
     join job using(job_code);
     
 insert into v_job values('j8','인턴');
@@ -574,3 +574,46 @@ insert into v_joinemp values(888, '조세오', '인사관리부');
 --           inserted into or updated.
 --*Action:   Phrase the statement as two or more separate statements.
 select * from user_views;
+
+--2.나이 상 가장 막내의 사원코드, 사원 명, 나이, 부서 명, 직급 명 조회
+select * from
+(select emp_id, emp_name, d.dept_title, j.job_name, extract(year from sysdate) - extract(year from emp_no) "나이"
+    from employee e
+    join department d on ( e.dept_code = d.dept_id)
+    join "JOB" j using (job_code)
+    ) tb1
+    where age = minage
+; 
+select
+    from employee;
+
+select extract(year from sysdate)
+        -extract(year from to_Date(substr(emp_no,1,2), 'yy'))
+    from employee
+;
+--한국이나 일본에서 근무중인 사원의 사원명, 부서명, 지역명 국가명
+
+select emp_name, d.date_title, j.job_name, c.local_name, n.national_name
+    from employee e
+    join department d on(e.dep-code = d.dept_id)
+    join "JOB" j using(job_code)
+    join location c on(d.location_id = c.local_code)
+    join national n using(national_code)
+    ;
+select emp_name, dept_code,
+    substr(emp_no,1,2)||'년'||substr(emp_no,3,2)||'월'||substr(emp_no,5,2)||'일' "생년월일"
+--    "만나이"
+    ,extract(year from sysdate) - extract(year from to_date(substr(emp_no,1,2),'rr')) "만나이"
+from employee
+;
+select to_date(substr(emp_no,1,6), 'rrmmdd')
+    , to_char(to_Date(substr(emp_no,1,6),'rrmmdd'), 'yy"년" mm"월" dd"일"') "생년월일"
+    , (sysdate - to_date(substr(emp_no,1,6),'rrmmdd'))/365
+    from employee;
+
+create synonym emp for employee;
+select * from emp;
+select * from dept2_public;
+
+grant select on department to scott;
+
