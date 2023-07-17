@@ -819,4 +819,27 @@ select * from kh.dept;
 select * from dept2_public;
 select * from kh.department;
 
+--ROLE
+--접속관련설정 -oracle 12이후 버전에서 false상태로 접속됨.
+alter session set "_ORACLE_SCRIPT"=true;
+create role role_scott_manager;
+create user kh2;
+
+--window - over ( partition by ..) 기존 group by 단점 개선
+select deptno, empno, ename, sal
+        , sum(sal) over(partition by deptno) sumsal
+        from emp;
+--window - over(order by..) 기존 rownum 대비 간결, 동일값에 같은 dense_rank()
+select deptno, empno, ename, sal
+        , rank() over(order by sal asc) ranksal
+        ,dense_rank() over(order by sal asc) dranksal
+        ,row_number() over(order by sal asc) rnsal
+        ,rank(2450) within group(order by sal asc) clarksal
+        from emp;
+-- rownum
+select deptno, empno, ename, sal
+        , rank() over(order by sal asc) ranksal
+    from (select rownum rn, t1.* from (select deptno, empno, ename, sal from emp order by sal asc) t1);
+
+
 

@@ -617,3 +617,39 @@ select * from dept2_public;
 
 grant select on department to scott;
 
+--20230717
+--group by 꼭 지켜져야하는 룰 : group by 컬럼명, 컬럼명만 select로 선택할 수 있음. 또는 그룹함수 사용.
+--rollup 전체 집계
+--dept_code로 묶인게 없음
+select dept_code, job_code, sum(salary)
+from employee
+group by rollup(job_code, dept_code)
+;
+--job_code로 묶인게 없음
+select dept_code, job_code, sum(salary)
+from employee
+group by rollup(dept_code, job_code)
+;
+--위 아래 같은 결과를 나오게 하기 위해서는 cube(c1, c2) = rollup(c1, c2)+ rollup(c2)
+select dept_code, job_code, sum(salary)
+from employee
+group by cube(dept_code, job_code)
+;
+
+select dept_code, sum(salary)
+from employee
+group by dept_code;
+
+select dept_code 부서코드, sum(salary) 합계, floor(avg(salary)) 평균, count(*) 인원수
+    from employee
+    group by dept_code
+    order by dept_code asc;
+
+select dept_code 부서코드, count(bonus) 인원수
+    from employee
+    where bonus is not null
+    group by dept_code
+    order by dept_code asc;
+
+select decode(substr(emp_no,8,1),1,'남',2,'여') 성별, florr(avg(sala))
+
