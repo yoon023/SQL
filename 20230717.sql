@@ -19,4 +19,6 @@ grant role_manager to kh2;
 
 revoke create view from role_manager;
 
+commit;
+
 
