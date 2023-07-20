@@ -1,0 +1,44 @@
+CREATE OR REPLACE PROCEDURE KDY_GUGUDAN
+IS--DECLARE
+    I NUMBER := 2;
+    J NUMBER := 1;
+BEGIN
+    
+    FOR J IN 1..9 LOOP
+        FOR I IN 2..9 LOOP
+            DBMS_OUTPUT.PUT(I||'*'||J||'='||(I*J)||' ' );
+        END LOOP;
+        DBMS_OUTPUT.PUT_LINE(' ');
+    END LOOP;
+END;
+/
+EXEC KDY_GUGUDAN;
+
+
+
+---- 20230719
+set SERVEROUTPUT on;
+
+CREATE OR REPLACE TRIGGER TRG_01
+    AFTER INSERT
+    ON EMPLOYEE
+    BEGIN
+    DBMS_OUTPUT.PUT_LINE('신입사원이 입사했습니다.');
+END;
+/
+INSERT INTO EMPLOYEE VALUES (905, '길성춘', '690512-1151432', 'gil_sj@kh.or.kr', '01035464455', 'D5', 'J3','S5', 3000000, 0.1, 200, SYSDATE, NULL,DEFAULT);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
