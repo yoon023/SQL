@@ -1,6 +1,8 @@
 prompt 워크북용 스크립트
 
+-- 명령어 결과 출력 여부 설정. on / off
 set feedback off
+-- 특수기능의 문자의 기능을 off 시키고, 문자 그대로를 입력가능하게 함.  예)& 입력창 뜨는 것 방지
 set define off
 
 DROP TABLE TB_DEPARTMENT CASCADE CONSTRAINTS;

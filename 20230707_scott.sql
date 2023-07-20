@@ -920,41 +920,36 @@ SELECT DEPTNO, ENAME, SAL
                             ) as DEPT_POORFROM
 FROM EMP;
 
+select empno, ename, sal, ntile(4) over(order by sal) from emp order by sal;
 
-select empno, ename, sal, ntile(4) over(order by sal) from emp;
+desc dept;
+select * from dept;
+insert into dept values(10,'ACCOUNT','NEW YORK');
+insert into dept values('&deptno','&부서명','&지역');
+--이전:insert into dept values('&deptno값을 넣어주세요','&부서명','&지역')
+--신규:insert into dept values('40 넣어주세요','매니저','서울')
+commit;
 
-DESC DEPT;
-SELECT * FROM DEPT;
-INSERT INTO DEPT VALUES(10, 'ACCOUNT', 'NEW YORK');
-INSERT INTO DEPT VALUES('&DEPTNO', '&부서명', '&지역');
---이전:INSERT INTO DEPT VALUES('&DEPTNO값을 넣어주세요', '&부서명', '&지역')
---신규:INSERT INTO DEPT VALUES('20 넣어주세요', '매니저', '서울')
-COMMIT;
-
-SELECT * FROM EMP
---    WHERE ENAME = '%SMITH' 
---    WHERE ENAME LIKE '%SMITH' --ABCSMITH 
---    COMM IS NULL
-    ENAME = '&SMITH' --대체문자창 비교연산자 가능 
+select * from emp
+    where 
+--    ename = '%SMITH' 
+--        ename like '%SMITH'  -- abcSMITH
+--        comm is null
+        ename = '&SMITH'
     ;
--- 비교 = ! = <> ^= > <>= <=
---TRUE FALSE 
---NULL 비교연산자 안됨 IS / IS NOT NULL
-SELECT '&ㅁㅁㅁ' FROM DUAL;
---'&' 작은 따옴표 안에 & - ESCAPE 문자 : 특별한 역할 - 대체문자입력창을 띄워줌.
---WHERE. SELECT 여기저기 
---검색을 '&_'로 검색하고 싶다면 
---LIKE '%' /LIKE '_' ESCAPE 문자 : 특별한역할 - % 문자 0개 이상, _문자 1개 
---검색을 _%로 하고싶으면 : LIKE '$_$%' ESCAPE '$'  
-SET DEFINE OFF
-SELECT '&ㅁㅁㅁ' FROM DUAL;
-INSERT INTO DEPT VALUES(80, 'R&D','NEW YORK');
-SET DEFINE ON;
-SELECT '&ㅁㅁㅁ' FROM DUAL;
-
-
-
-
+-- 비교 = != <> ^= > < >= <=
+-- true false
+-- null
+select '&ㅁㅁㅁ' from dual;
+-- '&' - 작은 따옴표 안에 & - escape 문자 : 특별한역할 - 대체문자입력창을 띄워줌. -- where , select 여기저기저기 
+-- 검색을 '&_'로 검색하고 싶다면 
+-- like '%'  / like '_'  - escape 문자 : 특별한역할 - %문자0개이상, _문자1개
+-- 검색을 _%로 하고 싶은면 : like '$_$%' escape '$'
+set define off;
+select '&ㅁㅁㅁ' from dual;
+insert into dept values(80,'R&D','NEW YORK');
+set define on;
+select '&ㅁㅁㅁ' from dual;
 
 
 
