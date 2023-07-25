@@ -197,8 +197,8 @@ select count(*) cnt, class_no
 ) tb2
 where rn <= 3
 ;
-
-
+select * from tb_student;
+desc tb_student;
 
 
 

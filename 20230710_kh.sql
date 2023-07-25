@@ -690,8 +690,11 @@ DESC EMPLOYEE;
 
 
 
+select * from tb_student join tb_department using(department_no)
+;
 
 
+select * from tb_department;
 
-
-
+select * from tb_student where student_name like '%&검색어%' or student_address like '%&검색어%'
+;
