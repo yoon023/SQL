@@ -42,7 +42,11 @@ select * from DEPT2_PUBLIC;
 alter session set "_ORACLE_SCRIPT"=true;
 drop user kh cascade;
 
+create user KHL identified by khl;
+create user khlib identified by khlib;
 
+create user khl identified by khl;
+grant connect, resource, dba to khl;
 
 
 

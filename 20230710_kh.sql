@@ -698,3 +698,10 @@ select * from tb_department;
 
 select * from tb_student where student_name like '%&검색어%' or student_address like '%&검색어%'
 ;
+select department_no, department_name,category,open_yn,capacity from tb_department
+order by OPEN_yaN desc, CATEGORY, DEPARTMENT_NAME
+;
+select * from tb_student order by student_no desc;
+select current_timestamp from dual;
+select SYSTIMESTAMP from dual;
+select SYSDATE FROM dual;
